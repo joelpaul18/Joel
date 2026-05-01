@@ -1,0 +1,118 @@
+import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { Code2, ExternalLink, Star } from 'lucide-react';
+import axios from 'axios';
+
+const defaultProjects = [
+    {
+        _id: '1',
+        name: 'AI Image Generator',
+        description: 'A full-stack application using OpenAI API to generate images based on text prompts.',
+        thumbnail: 'https://via.placeholder.com/600x400',
+        techStack: ['React', 'Node.js', 'MongoDB', 'OpenAI'],
+        githubUrl: '#',
+        liveUrl: '#',
+        isFeatured: true,
+        category: 'Full Stack',
+    },
+    {
+        _id: '2',
+        name: 'Portfolio Template',
+        description: 'A highly customizable portfolio template built with Vite and TailwindCSS.',
+        thumbnail: 'https://via.placeholder.com/600x400',
+        techStack: ['React', 'TailwindCSS', 'Framer Motion'],
+        githubUrl: '#',
+        liveUrl: '#',
+        isFeatured: false,
+        category: 'Frontend',
+    },
+];
+
+export default function Projects() {
+    const [projects, setProjects] = useState(defaultProjects);
+    const [filter, setFilter] = useState('All');
+
+    useEffect(() => {
+        axios.get('/api/public/projects')
+            .then(res => {
+                if (res.data?.length) setProjects(res.data);
+            })
+            .catch(() => setProjects(defaultProjects));
+    }, []);
+    const filters = ['All', 'Frontend', 'Full Stack', 'Cloud/DevOps'];
+
+    const filteredProjects = filter === 'All'
+        ? projects
+        : projects.filter(p => p.category === filter || p.techStack?.includes(filter));
+
+    return (
+        <section id="projects" className="py-24 md:py-32">
+            <div className="section-shell">
+                <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+                    <motion.div initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-2xl">
+                        <p className="section-kicker">Projects</p>
+                        <h2 className="section-title mt-3">Selected builds with working details.</h2>
+                    </motion.div>
+
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                        {filters.map(f => (
+                            <button
+                                key={f}
+                                onClick={() => setFilter(f)}
+                                className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-extrabold transition-all ${filter === f ? 'bg-slate-950 text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-accent hover:text-accent'}`}
+                            >
+                                {f}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredProjects.map((project, i) => (
+                        <motion.article
+                            key={project._id}
+                            initial={{ opacity: 0, y: 28 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.08 }}
+                            viewport={{ once: true }}
+                            className={`surface group overflow-hidden rounded-2xl ${project.isFeatured ? 'md:col-span-2 lg:col-span-2' : ''}`}
+                        >
+                            <div className="relative aspect-video overflow-hidden bg-slate-100">
+                                <img src={project.thumbnail} alt={project.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 to-transparent opacity-80" />
+                                <div className="absolute left-5 right-5 bottom-5 flex items-center justify-between gap-4">
+                                    {project.isFeatured && (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-300 px-3 py-1 text-xs font-extrabold text-slate-950">
+                                            <Star size={14} fill="currentColor" /> Featured
+                                        </span>
+                                    )}
+                                    <div className="ml-auto flex gap-2">
+                                        {project.githubUrl && (
+                                            <a href={project.githubUrl} target="_blank" rel="noreferrer" className="grid h-10 w-10 place-items-center rounded-full bg-white text-slate-900 shadow-sm hover:bg-accent hover:text-white transition-colors" aria-label={`${project.name} source code`}>
+                                                <Code2 size={18} />
+                                            </a>
+                                        )}
+                                        {project.liveUrl && (
+                                            <a href={project.liveUrl} target="_blank" rel="noreferrer" className="grid h-10 w-10 place-items-center rounded-full bg-white text-slate-900 shadow-sm hover:bg-accent hover:text-white transition-colors" aria-label={`${project.name} live site`}>
+                                                <ExternalLink size={18} />
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-6 md:p-8">
+                                <h3 className="text-2xl font-extrabold text-slate-950">{project.name}</h3>
+                                <p className="mt-3 leading-7 text-slate-600">{project.description}</p>
+                                <div className="mt-6 flex flex-wrap gap-2">
+                                    {project.techStack.map(tech => (
+                                        <span key={tech} className="rounded-full bg-teal-50 px-3 py-1.5 text-xs font-extrabold text-teal-800">{tech}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        </motion.article>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}

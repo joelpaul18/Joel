@@ -1,0 +1,135 @@
+import { useEffect, useState } from 'react';
+import { ImagePlus, Plus, Trash2, X } from 'lucide-react';
+import axios from 'axios';
+
+const fallbackSkills = [
+    { _id: '1', name: 'React', category: 'Frontend', icon: 'Code2' },
+    { _id: '2', name: 'Node.js', category: 'Backend', icon: 'Server' },
+];
+
+export default function SkillsManager() {
+    const [skills, setSkills] = useState([]);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [form, setForm] = useState({ name: '', category: 'Frontend', icon: '' });
+
+    useEffect(() => {
+        axios.get('/api/public/skills')
+            .then(res => setSkills(res.data?.length ? res.data : fallbackSkills))
+            .catch(() => setSkills(fallbackSkills));
+    }, []);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await axios.post('/api/admin/skills', form, { withCredentials: true });
+            setSkills(current => [res.data, ...current]);
+        } catch {
+            setSkills(current => [{ ...form, _id: crypto.randomUUID() }, ...current]);
+        }
+        setForm({ name: '', category: 'Frontend', icon: '' });
+        setIsFormOpen(false);
+    };
+
+    const handleIconUpload = (file) => {
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            alert('Please choose an image file.');
+            return;
+        }
+
+        if (file.size > 1024 * 1024) {
+            alert('Please choose an icon image under 1MB.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => setForm(current => ({ ...current, icon: reader.result }));
+        reader.readAsDataURL(file);
+    };
+
+    const isImageSource = (value) => value?.startsWith('data:image') || value?.startsWith('http://') || value?.startsWith('https://');
+
+    const renderSkillIcon = (skill) => {
+        if (isImageSource(skill.icon)) {
+            return <img src={skill.icon} alt={`${skill.name} icon`} className="h-full w-full rounded-full object-cover" />;
+        }
+
+        return <span className="text-sm font-extrabold text-accent">{skill.name?.charAt(0) || '?'}</span>;
+    };
+
+    const handleDelete = async (id) => {
+        if (!confirm('Delete this skill?')) return;
+        try {
+            await axios.delete(`/api/admin/skills/${id}`, { withCredentials: true });
+        } catch {
+            // Local fallback below.
+        }
+        setSkills(current => current.filter(skill => skill._id !== id));
+    };
+
+    return (
+        <div>
+            <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-5 mb-8 w-full">
+                <div>
+                    <p className="section-kicker">Stack</p>
+                    <h2 className="section-title mt-3">Skills</h2>
+                </div>
+                <button onClick={() => setIsFormOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 font-extrabold text-white shadow-sm transition-colors hover:bg-slate-950">
+                    <Plus size={20} /> Add Skill
+                </button>
+            </div>
+
+            {isFormOpen && (
+                <form onSubmit={handleSubmit} className="surface mb-8 rounded-2xl p-6">
+                    <div className="mb-6 flex items-center justify-between gap-4">
+                        <h3 className="text-2xl font-extrabold text-slate-950">Add Skill</h3>
+                        <button type="button" onClick={() => setIsFormOpen(false)} className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200">
+                            <X size={20} />
+                        </button>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-5 items-start">
+                        <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="focus-ring rounded-xl border border-slate-200 bg-stone-50 px-4 py-3 font-bold" placeholder="Skill name" />
+                        <input required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="focus-ring rounded-xl border border-slate-200 bg-stone-50 px-4 py-3 font-bold" placeholder="Category, e.g. Frontend or AI Tools" list="skill-categories" />
+                        <datalist id="skill-categories">
+                            {[...new Set(skills.map(skill => skill.category).filter(Boolean))].map(category => (
+                                <option key={category} value={category} />
+                            ))}
+                        </datalist>
+                        <input required value={form.icon} onChange={e => setForm({ ...form, icon: e.target.value })} className="focus-ring rounded-xl border border-slate-200 bg-stone-50 px-4 py-3 font-bold md:col-span-2" placeholder="Paste icon image URL, or upload below" />
+                        <label className="flex cursor-pointer items-center gap-4 rounded-xl border border-slate-200 bg-stone-50 px-4 py-3 font-bold text-slate-700 hover:border-accent md:col-span-2">
+                            <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-200 bg-white text-accent">
+                                {isImageSource(form.icon) ? <img src={form.icon} alt="Skill icon preview" className="h-full w-full object-cover" /> : <ImagePlus size={22} />}
+                            </span>
+                            <span className="whitespace-nowrap">{form.icon ? 'Upload Different Icon' : 'Upload Icon'}</span>
+                            <input type="file" accept="image/*" onChange={e => handleIconUpload(e.target.files?.[0])} className="sr-only" />
+                        </label>
+                    </div>
+                    <button type="submit" className="mt-6 rounded-xl bg-accent px-5 py-3 font-extrabold text-white hover:bg-slate-950 transition-colors">
+                        Create Skill
+                    </button>
+                </form>
+            )}
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+                {skills.map(skill => (
+                    <div key={skill._id} className="surface p-6 rounded-2xl flex justify-between items-center group hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-4">
+                            <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-200 bg-teal-50">
+                                {renderSkillIcon(skill)}
+                            </span>
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900">{skill.name}</h3>
+                                <p className="text-slate-500 font-medium">{skill.category}</p>
+                            </div>
+                        </div>
+                        <button onClick={() => handleDelete(skill._id)} className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all md:opacity-0 group-hover:opacity-100">
+                            <Trash2 size={20} />
+                        </button>
+                    </div>
+                ))}
+                {skills.length === 0 && <div className="text-slate-400 font-bold">No skills found. Add one.</div>}
+            </div>
+        </div>
+    );
+}
