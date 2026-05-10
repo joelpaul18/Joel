@@ -81,10 +81,10 @@ export default function SkillsManager() {
                 const res = await axios.get('/api/public/skills');
                 const apiSkills = res.data?.length ? res.data : [];
                 const nextSkills = mergeSkills(apiSkills, remainingLocalSkills);
-                setSkills(nextSkills);
+                setSkills(nextSkills.length ? nextSkills : fallbackSkills);
                 setSavedCategories(current => getUniqueCategories(current, nextSkills.map(skill => skill.category)));
             } catch {
-                setSkills(localSkills);
+                setSkills(localSkills.length ? localSkills : fallbackSkills);
                 setSavedCategories(current => getUniqueCategories(current, localSkills.map(skill => skill.category)));
             }
         };
