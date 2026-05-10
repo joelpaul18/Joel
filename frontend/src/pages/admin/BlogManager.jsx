@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Edit2, Plus, Trash2, X } from 'lucide-react';
 import axios from 'axios';
+import RichTextEditor from '../../components/admin/RichTextEditor';
 
 const emptyBlog = {
     title: '',
@@ -130,7 +131,10 @@ export default function BlogManager() {
                             <input type="checkbox" checked={form.isPublished} onChange={e => setForm({ ...form, isPublished: e.target.checked })} />
                             Published
                         </label>
-                        <textarea required value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} className="focus-ring md:col-span-2 min-h-44 rounded-xl border border-slate-200 bg-stone-50 px-4 py-3 font-medium" placeholder="Post body" />
+                        <div className="md:col-span-2 space-y-1">
+                            <p className="text-xs font-bold text-slate-500">BODY</p>
+                            <RichTextEditor value={form.body} onChange={val => setForm({ ...form, body: val })} />
+                        </div>
                     </div>
                     <button type="submit" className="mt-6 rounded-xl bg-accent px-5 py-3 font-extrabold text-white hover:bg-slate-950 transition-colors">
                         {editingId ? 'Save Post' : 'Create Post'}

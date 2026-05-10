@@ -8,7 +8,52 @@ const SiteContent = require('../models/SiteContent');
 
 const router = express.Router();
 
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const uploadDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname.replace(/\s+/g, '-'));
+    }
+});
+const upload = multer({ storage: storage });
+
 router.use(verifyToken);
+
+// File Upload
+router.post('/upload', upload.single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+    }
+    const imageUrl = `/uploads/${req.file.filename}`;
+    res.json({ imageUrl });
+});
+
+// Stats
+router.get('/stats', async (req, res) => {
+    try {
+        const totalBlogs = await Blog.countDocuments();
+        const activeProjects = await Project.countDocuments();
+        const unreadMessages = await Message.countDocuments({ isRead: false });
+
+        res.json({
+            totalBlogs,
+            activeProjects,
+            unreadMessages
+        });
+    } catch (e) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
 // Blogs
 router.get('/blogs', async (req, res) => {

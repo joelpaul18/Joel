@@ -1,6 +1,7 @@
 import { Route, Routes, Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowUpRight, Briefcase, FileText, LayoutDashboard, LogOut, Mail, Settings, User } from 'lucide-react';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext';
 import ContentManager from './ContentManager';
 import BlogManager from './BlogManager';
@@ -10,10 +11,22 @@ import MessagesManager from './MessagesManager';
 
 function Overview() {
     const navigate = useNavigate();
+    const [stats, setStats] = useState({
+        totalBlogs: 0,
+        activeProjects: 0,
+        unreadMessages: 0
+    });
+
+    useEffect(() => {
+        axios.get('/api/admin/stats', { withCredentials: true })
+            .then(res => setStats(res.data))
+            .catch(err => console.error('Failed to fetch stats', err));
+    }, []);
+
     const metrics = [
-        ['Total Views', '1,204'],
-        ['Active Projects', '12'],
-        ['Unread Messages', '3'],
+        ['Total Blogs', stats.totalBlogs.toString()],
+        ['Active Projects', stats.activeProjects.toString()],
+        ['Unread Messages', stats.unreadMessages.toString()],
     ];
 
     return (

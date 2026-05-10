@@ -7,26 +7,118 @@ const fallbackSkills = [
     { _id: '2', name: 'Node.js', category: 'Backend', icon: 'Server' },
 ];
 
+const localSkillsKey = 'joel-admin-skills';
+const localSkillCategoriesKey = 'joel-admin-skill-categories';
+
+const readLocalSkills = () => {
+    try {
+        return JSON.parse(localStorage.getItem(localSkillsKey)) || [];
+    } catch {
+        return [];
+    }
+};
+
+const writeLocalSkills = (skills) => {
+    localStorage.setItem(localSkillsKey, JSON.stringify(skills));
+};
+
+const readLocalCategories = () => {
+    try {
+        return JSON.parse(localStorage.getItem(localSkillCategoriesKey)) || [];
+    } catch {
+        return [];
+    }
+};
+
+const writeLocalCategories = (categories) => {
+    localStorage.setItem(localSkillCategoriesKey, JSON.stringify(categories));
+};
+
+const mergeSkills = (...skillGroups) => {
+    const merged = new Map();
+    skillGroups.flat().forEach(skill => {
+        if (skill?._id) merged.set(skill._id, skill);
+    });
+    return [...merged.values()];
+};
+
+const getUniqueCategories = (...categoryGroups) => {
+    const categories = categoryGroups
+        .flat()
+        .map(category => category?.trim())
+        .filter(Boolean);
+
+    return [...new Set(categories)].sort((a, b) => a.localeCompare(b));
+};
+
 export default function SkillsManager() {
     const [skills, setSkills] = useState([]);
+    const [savedCategories, setSavedCategories] = useState(() => readLocalCategories());
     const [isFormOpen, setIsFormOpen] = useState(false);
+    const [isAddingCategory, setIsAddingCategory] = useState(false);
     const [form, setForm] = useState({ name: '', category: 'Frontend', icon: '' });
 
     useEffect(() => {
-        axios.get('/api/public/skills')
-            .then(res => setSkills(res.data?.length ? res.data : fallbackSkills))
-            .catch(() => setSkills(fallbackSkills));
+        const loadSkills = async () => {
+            const localSkills = readLocalSkills();
+
+            try {
+                const savedLocalSkills = [];
+
+                for (const skill of localSkills) {
+                    try {
+                        const payload = {
+                            name: skill.name,
+                            category: skill.category,
+                            icon: skill.icon,
+                        };
+                        const res = await axios.post('/api/admin/skills', payload, { withCredentials: true });
+                        savedLocalSkills.push(res.data);
+                    } catch {
+                        savedLocalSkills.push(skill);
+                    }
+                }
+
+                const remainingLocalSkills = savedLocalSkills.filter(skill => skill.savedLocally);
+                writeLocalSkills(remainingLocalSkills);
+
+                const res = await axios.get('/api/public/skills');
+                const apiSkills = res.data?.length ? res.data : [];
+                const nextSkills = mergeSkills(apiSkills, remainingLocalSkills);
+                setSkills(nextSkills.length ? nextSkills : fallbackSkills);
+                setSavedCategories(current => getUniqueCategories(current, nextSkills.map(skill => skill.category)));
+            } catch {
+                setSkills(localSkills.length ? localSkills : fallbackSkills);
+                setSavedCategories(current => getUniqueCategories(current, localSkills.map(skill => skill.category)));
+            }
+        };
+
+        loadSkills();
     }, []);
+
+    useEffect(() => {
+        writeLocalCategories(savedCategories);
+    }, [savedCategories]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const trimmedCategory = form.category.trim();
+        const payload = { ...form, category: trimmedCategory };
+        let savedSkill;
+
         try {
-            const res = await axios.post('/api/admin/skills', form, { withCredentials: true });
-            setSkills(current => [res.data, ...current]);
+            const res = await axios.post('/api/admin/skills', payload, { withCredentials: true });
+            savedSkill = res.data;
         } catch {
-            setSkills(current => [{ ...form, _id: crypto.randomUUID() }, ...current]);
+            savedSkill = { ...payload, _id: crypto.randomUUID(), savedLocally: true };
+            const localSkills = readLocalSkills();
+            writeLocalSkills([savedSkill, ...localSkills]);
         }
+
+        setSkills(current => [savedSkill, ...current.filter(skill => skill._id !== savedSkill._id)]);
+        setSavedCategories(current => getUniqueCategories(current, trimmedCategory));
         setForm({ name: '', category: 'Frontend', icon: '' });
+        setIsAddingCategory(false);
         setIsFormOpen(false);
     };
 
@@ -65,8 +157,16 @@ export default function SkillsManager() {
         } catch {
             // Local fallback below.
         }
+        writeLocalSkills(readLocalSkills().filter(skill => skill._id !== id));
         setSkills(current => current.filter(skill => skill._id !== id));
     };
+
+    const categoryOptions = getUniqueCategories(
+        savedCategories,
+        fallbackSkills.map(skill => skill.category),
+        skills.map(skill => skill.category),
+        isAddingCategory ? '' : form.category
+    );
 
     return (
         <div>
@@ -90,12 +190,37 @@ export default function SkillsManager() {
                     </div>
                     <div className="grid md:grid-cols-2 gap-5 items-start">
                         <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="focus-ring rounded-xl border border-slate-200 bg-stone-50 px-4 py-3 font-bold" placeholder="Skill name" />
-                        <input required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="focus-ring rounded-xl border border-slate-200 bg-stone-50 px-4 py-3 font-bold" placeholder="Category, e.g. Frontend or AI Tools" list="skill-categories" />
-                        <datalist id="skill-categories">
-                            {[...new Set(skills.map(skill => skill.category).filter(Boolean))].map(category => (
-                                <option key={category} value={category} />
-                            ))}
-                        </datalist>
+                        <div className="space-y-3">
+                            <select
+                                value={isAddingCategory ? '__new__' : form.category}
+                                onChange={e => {
+                                    if (e.target.value === '__new__') {
+                                        setIsAddingCategory(true);
+                                        setForm(current => ({ ...current, category: '' }));
+                                        return;
+                                    }
+
+                                    setIsAddingCategory(false);
+                                    setForm(current => ({ ...current, category: e.target.value }));
+                                }}
+                                className="focus-ring w-full rounded-xl border border-slate-200 bg-stone-50 px-4 py-3 font-bold"
+                            >
+                                {categoryOptions.map(category => (
+                                    <option key={category} value={category}>{category}</option>
+                                ))}
+                                <option value="__new__">Add new category</option>
+                            </select>
+                            {isAddingCategory && (
+                                <input
+                                    required
+                                    autoFocus
+                                    value={form.category}
+                                    onChange={e => setForm({ ...form, category: e.target.value })}
+                                    className="focus-ring w-full rounded-xl border border-slate-200 bg-white px-4 py-3 font-bold"
+                                    placeholder="New category, e.g. General"
+                                />
+                            )}
+                        </div>
                         <input required value={form.icon} onChange={e => setForm({ ...form, icon: e.target.value })} className="focus-ring rounded-xl border border-slate-200 bg-stone-50 px-4 py-3 font-bold md:col-span-2" placeholder="Paste icon image URL, or upload below" />
                         <label className="flex cursor-pointer items-center gap-4 rounded-xl border border-slate-200 bg-stone-50 px-4 py-3 font-bold text-slate-700 hover:border-accent md:col-span-2">
                             <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-200 bg-white text-accent">

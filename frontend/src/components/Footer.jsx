@@ -1,4 +1,4 @@
-import { Briefcase, Code2 } from 'lucide-react';
+import { Briefcase, Code2, Mail } from 'lucide-react';
 import { useContext } from 'react';
 import { SiteContext } from '../context/SiteContext';
 
@@ -18,8 +18,9 @@ export default function Footer() {
                 </p>
 
                 <div className="flex gap-3">
+                    <a href="mailto:joelpaulvilangu@gmail.com" className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-stone-50 text-slate-600 hover:bg-accent hover:text-white transition-colors" aria-label="Email directly"><Mail size={20} /></a>
                     <a href="#" className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-stone-50 text-slate-600 hover:bg-accent hover:text-white transition-colors" aria-label="Code profile"><Code2 size={20} /></a>
-                    <a href="#" className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-stone-50 text-slate-600 hover:bg-accent hover:text-white transition-colors" aria-label="Work profile"><Briefcase size={20} /></a>
+                    <a href="https://www.linkedin.com/in/joel-paul-kochi" target="_blank" rel="noopener noreferrer" className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-stone-50 text-slate-600 hover:bg-accent hover:text-white transition-colors" aria-label="Work profile"><Briefcase size={20} /></a>
                 </div>
             </div>
         </footer>

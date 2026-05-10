@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Loader2, Mail, Send } from 'lucide-react';
+import axios from 'axios';
 
 export default function Contact() {
     const [formData, setFormData] = useState({ name: '', email: '', message: '' });
@@ -9,11 +10,16 @@ export default function Contact() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setStatus('loading');
-        setTimeout(() => {
+        try {
+            await axios.post('/api/public/contact', formData);
             setStatus('success');
             setFormData({ name: '', email: '', message: '' });
             setTimeout(() => setStatus('idle'), 3000);
-        }, 1500);
+        } catch (error) {
+            console.error('Failed to send message', error);
+            setStatus('idle');
+            alert('Failed to send message. Please try again.');
+        }
     };
 
     return (
@@ -29,6 +35,18 @@ export default function Contact() {
                         <Mail size={28} className="mb-4 text-amber-700" />
                         <p className="font-heading text-2xl font-extrabold">Clear context helps.</p>
                         <p className="mt-2 leading-7 text-slate-700">A timeline, goal, or rough scope is enough to start a useful conversation.</p>
+                    </div>
+                    
+                    <div className="mt-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-600">
+                            <Mail size={20} />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Or email directly</p>
+                            <a href="mailto:joelpaulvilangu@gmail.com" className="font-bold text-slate-900 hover:text-accent transition-colors">
+                                joelpaulvilangu@gmail.com
+                            </a>
+                        </div>
                     </div>
                 </motion.div>
 

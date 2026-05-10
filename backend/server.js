@@ -21,7 +21,10 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/joel_portfo
     .catch(err => console.error('MongoDB connection error:', err));
 
 // Routes
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', require('./routes/auth'));
+
 app.use('/api/public', require('./routes/public'));
 app.use('/api/admin', require('./routes/admin'));
 

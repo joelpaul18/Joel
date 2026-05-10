@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { Cloud, Code2, Database, Server } from 'lucide-react';
 import axios from 'axios';
+import { SiteContext } from '../context/SiteContext';
 
 const defaultSkills = [
     { name: 'React', category: 'Frontend', icon: '' },
@@ -20,15 +21,39 @@ const categoryIcons = {
     'Cloud/DevOps': Cloud,
 };
 
+const localSkillsKey = 'joel-admin-skills';
+
+const readLocalSkills = () => {
+    try {
+        return JSON.parse(localStorage.getItem(localSkillsKey)) || [];
+    } catch {
+        return [];
+    }
+};
+
+const mergeSkills = (...skillGroups) => {
+    const merged = new Map();
+    skillGroups.flat().forEach(skill => {
+        const key = skill?._id || `${skill?.name}-${skill?.category}`;
+        if (skill?.name && key) merged.set(key, skill);
+    });
+    return [...merged.values()];
+};
+
 export default function Skills() {
     const [skills, setSkills] = useState(defaultSkills);
+    const { siteContent } = useContext(SiteContext);
 
     useEffect(() => {
+        const localSkills = readLocalSkills();
+
         axios.get('/api/public/skills')
             .then(res => {
-                if (res.data?.length) setSkills(res.data);
+                const apiSkills = res.data?.length ? res.data : [];
+                const nextSkills = mergeSkills(apiSkills, localSkills);
+                setSkills(nextSkills.length ? nextSkills : defaultSkills);
             })
-            .catch(() => setSkills(defaultSkills));
+            .catch(() => setSkills(localSkills.length ? localSkills : defaultSkills));
     }, []);
 
     const categories = [...new Set(skills.map(skill => skill.category).filter(Boolean))];
@@ -45,8 +70,8 @@ export default function Skills() {
         <section id="skills" className="py-24 md:py-32 bg-white/70 border-y border-slate-200/80">
             <div className="section-shell">
                 <motion.div initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-2xl">
-                    <p className="section-kicker">Skills</p>
-                    <h2 className="section-title mt-3">A focused stack for full-stack work.</h2>
+                    <p className="section-kicker">{siteContent?.skillsKicker || "Skills"}</p>
+                    <h2 className="section-title mt-3">{siteContent?.skillsHeading || "A focused stack for full-stack work."}</h2>
                 </motion.div>
 
                 <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-5">

@@ -24,6 +24,10 @@
   h6 {
     @apply font-heading text-slate-950 font-bold;
   }
+
+  .prose p:empty::before {
+    content: "\00A0";
+  }
 }
 
 @layer components {

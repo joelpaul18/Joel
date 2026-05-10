@@ -1,15 +1,20 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Download, Menu, X } from 'lucide-react';
 
 export default function Navbar() {
     const [open, setOpen] = useState(false);
+    const location = useLocation();
+    const isHome = location.pathname === '/';
+
     const navItems = [
-        ['About', '#about'],
-        ['Skills', '#skills'],
-        ['Projects', '#projects'],
-        ['Blog', '#blog'],
-        ['Contact', '#contact'],
+        ['About', isHome ? '#about' : '/#about'],
+        ['Skills', isHome ? '#skills' : '/#skills'],
+        ['Projects', isHome ? '#projects' : '/#projects'],
+        ['Blog', isHome ? '#blog' : '/#blog'],
+        ['Contact', isHome ? '#contact' : '/#contact'],
     ];
+
 
     return (
         <nav className="fixed top-0 w-full z-50 border-b border-slate-200/80 bg-stone-50/88 backdrop-blur-xl">

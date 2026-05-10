@@ -31,7 +31,7 @@ export default function About() {
                         className="relative hidden lg:block"
                     >
                         <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-3 shadow-xl">
-                            <img src={heroImage} alt="Portrait style workspace visual" className="aspect-square w-full rounded-[1.35rem] object-cover" />
+                            <img src={siteContent?.aboutImage || heroImage} alt="Portrait style workspace visual" className="aspect-square w-full rounded-[1.35rem] object-cover" />
                         </div>
                         <div className="absolute -bottom-6 -right-4 rounded-2xl bg-slate-950 px-5 py-4 text-white shadow-xl">
                             <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-amber-200">Focus</p>
@@ -45,7 +45,7 @@ export default function About() {
                         viewport={{ once: true }}
                     >
                         <p className="section-kicker">About</p>
-                        <h2 className="section-title mt-3">Useful software, carefully shaped.</h2>
+                        <h2 className="section-title mt-3">{siteContent?.aboutHeading || "Useful software, carefully shaped."}</h2>
                         <p className="mt-7 text-xl leading-9 text-slate-600">
                             {siteContent?.aboutDescription || "I'm a full-stack developer obsessed with creating clean, user-friendly experiences backed by robust, scalable architectures."}
                         </p>

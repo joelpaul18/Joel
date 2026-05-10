@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { Code2, ExternalLink, Star } from 'lucide-react';
 import axios from 'axios';
+import { SiteContext } from '../context/SiteContext';
 
 const defaultProjects = [
     {
@@ -30,7 +31,7 @@ const defaultProjects = [
 
 export default function Projects() {
     const [projects, setProjects] = useState(defaultProjects);
-    const [filter, setFilter] = useState('All');
+    const { siteContent } = useContext(SiteContext);
 
     useEffect(() => {
         axios.get('/api/public/projects')
@@ -39,36 +40,20 @@ export default function Projects() {
             })
             .catch(() => setProjects(defaultProjects));
     }, []);
-    const filters = ['All', 'Frontend', 'Full Stack', 'Cloud/DevOps'];
-
-    const filteredProjects = filter === 'All'
-        ? projects
-        : projects.filter(p => p.category === filter || p.techStack?.includes(filter));
 
     return (
         <section id="projects" className="py-24 md:py-32">
             <div className="section-shell">
                 <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
                     <motion.div initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-2xl">
-                        <p className="section-kicker">Projects</p>
-                        <h2 className="section-title mt-3">Selected builds with working details.</h2>
+                        <p className="section-kicker">{siteContent?.projectsKicker || "Projects"}</p>
+                        <h2 className="section-title mt-3">{siteContent?.projectsHeading || "Selected builds with working details."}</h2>
                     </motion.div>
 
-                    <div className="flex gap-2 overflow-x-auto pb-1">
-                        {filters.map(f => (
-                            <button
-                                key={f}
-                                onClick={() => setFilter(f)}
-                                className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-extrabold transition-all ${filter === f ? 'bg-slate-950 text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-accent hover:text-accent'}`}
-                            >
-                                {f}
-                            </button>
-                        ))}
-                    </div>
                 </div>
 
                 <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredProjects.map((project, i) => (
+                    {projects.map((project, i) => (
                         <motion.article
                             key={project._id}
                             initial={{ opacity: 0, y: 28 }}
