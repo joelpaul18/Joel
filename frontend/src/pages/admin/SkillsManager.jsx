@@ -158,10 +158,9 @@ export default function SkillsManager() {
     };
 
     const categoryOptions = getUniqueCategories(
-        savedCategories,
-        fallbackSkills.map(skill => skill.category),
-        skills.map(skill => skill.category),
-        isAddingCategory ? '' : form.category
+    savedCategories,
+    skills.map(skill => skill.category),
+    isAddingCategory ? '' : form.category
     );
 
     return (
