@@ -4,34 +4,16 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight, Clock } from 'lucide-react';
 import axios from 'axios';
 
-const defaultBlogs = [
-    {
-        _id: '1',
-        title: 'Why I switched to Vite and never looked back',
-        slug: 'why-vite',
-        coverImage: 'https://via.placeholder.com/800x400',
-        tags: ['React', 'Tooling'],
-        createdAt: new Date().toISOString(),
-    },
-    {
-        _id: '2',
-        title: 'Understanding JWTs in a modern MERN stack',
-        slug: 'understanding-jwts',
-        coverImage: 'https://via.placeholder.com/800x400',
-        tags: ['Security', 'Node.js'],
-        createdAt: new Date().toISOString(),
-    },
-];
 
 export default function Blog() {
-    const [blogs, setBlogs] = useState(defaultBlogs);
+    const [blogs, setBlogs] = useState([]);
 
     useEffect(() => {
         axios.get('/api/public/blogs')
             .then(res => {
                 if (res.data?.length) setBlogs(res.data);
             })
-            .catch(() => setBlogs(defaultBlogs));
+            .catch(() => setBlogs([]));
     }, []);
     return (
         <section id="blog" className="py-24 md:py-32 bg-slate-950 text-white">
