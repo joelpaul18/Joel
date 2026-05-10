@@ -2,10 +2,6 @@ import { useEffect, useState } from 'react';
 import { ImagePlus, Plus, Trash2, X } from 'lucide-react';
 import axios from 'axios';
 
-const fallbackSkills = [
-    { _id: '1', name: 'React', category: 'Frontend', icon: 'Code2' },
-    { _id: '2', name: 'Node.js', category: 'Backend', icon: 'Server' },
-];
 
 const localSkillsKey = 'joel-admin-skills';
 const localSkillCategoriesKey = 'joel-admin-skill-categories';
@@ -85,10 +81,10 @@ export default function SkillsManager() {
                 const res = await axios.get('/api/public/skills');
                 const apiSkills = res.data?.length ? res.data : [];
                 const nextSkills = mergeSkills(apiSkills, remainingLocalSkills);
-                setSkills(nextSkills.length ? nextSkills : fallbackSkills);
+                setSkills(nextSkills);
                 setSavedCategories(current => getUniqueCategories(current, nextSkills.map(skill => skill.category)));
             } catch {
-                setSkills(localSkills.length ? localSkills : fallbackSkills);
+                setSkills(localSkills);
                 setSavedCategories(current => getUniqueCategories(current, localSkills.map(skill => skill.category)));
             }
         };
