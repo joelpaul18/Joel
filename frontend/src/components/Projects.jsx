@@ -4,33 +4,10 @@ import { Code2, ExternalLink, Star } from 'lucide-react';
 import axios from 'axios';
 import { SiteContext } from '../context/SiteContext';
 
-const defaultProjects = [
-    {
-        _id: '1',
-        name: 'AI Image Generator',
-        description: 'A full-stack application using OpenAI API to generate images based on text prompts.',
-        thumbnail: 'https://via.placeholder.com/600x400',
-        techStack: ['React', 'Node.js', 'MongoDB', 'OpenAI'],
-        githubUrl: '#',
-        liveUrl: '#',
-        isFeatured: true,
-        category: 'Full Stack',
-    },
-    {
-        _id: '2',
-        name: 'Portfolio Template',
-        description: 'A highly customizable portfolio template built with Vite and TailwindCSS.',
-        thumbnail: 'https://via.placeholder.com/600x400',
-        techStack: ['React', 'TailwindCSS', 'Framer Motion'],
-        githubUrl: '#',
-        liveUrl: '#',
-        isFeatured: false,
-        category: 'Frontend',
-    },
-];
+
 
 export default function Projects() {
-    const [projects, setProjects] = useState(defaultProjects);
+    const [projects, setProjects] = useState([]);
     const { siteContent } = useContext(SiteContext);
 
     useEffect(() => {
@@ -38,7 +15,7 @@ export default function Projects() {
             .then(res => {
                 if (res.data?.length) setProjects(res.data);
             })
-            .catch(() => setProjects(defaultProjects));
+            .catch(() => setProjects([]));
     }, []);
 
     return (

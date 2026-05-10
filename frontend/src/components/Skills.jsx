@@ -4,15 +4,7 @@ import { Cloud, Code2, Database, Server } from 'lucide-react';
 import axios from 'axios';
 import { SiteContext } from '../context/SiteContext';
 
-const defaultSkills = [
-    { name: 'React', category: 'Frontend', icon: '' },
-    { name: 'TailwindCSS', category: 'Frontend', icon: '' },
-    { name: 'Framer Motion', category: 'Frontend', icon: '' },
-    { name: 'Node.js', category: 'Backend', icon: '' },
-    { name: 'Express', category: 'Backend', icon: '' },
-    { name: 'MongoDB', category: 'Database', icon: '' },
-    { name: 'Docker', category: 'Cloud/DevOps', icon: '' },
-];
+
 
 const categoryIcons = {
     Frontend: Code2,
@@ -41,7 +33,7 @@ const mergeSkills = (...skillGroups) => {
 };
 
 export default function Skills() {
-    const [skills, setSkills] = useState(defaultSkills);
+    const [skills, setSkills] = useState([]);
     const { siteContent } = useContext(SiteContext);
 
     useEffect(() => {
@@ -51,9 +43,9 @@ export default function Skills() {
             .then(res => {
                 const apiSkills = res.data?.length ? res.data : [];
                 const nextSkills = mergeSkills(apiSkills, localSkills);
-                setSkills(nextSkills.length ? nextSkills : defaultSkills);
+                setSkills(nextSkills);
             })
-            .catch(() => setSkills(localSkills.length ? localSkills : defaultSkills));
+            .catch(() => setSkills(localSkills));
     }, []);
 
     const categories = [...new Set(skills.map(skill => skill.category).filter(Boolean))];
