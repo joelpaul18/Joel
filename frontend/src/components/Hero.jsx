@@ -58,7 +58,16 @@ export default function Hero() {
                 <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15, duration: 0.55 }} className="relative">
                     <div className="absolute -inset-5 rotate-3 rounded-[2rem] bg-amber-300/30" />
                     <div className="relative overflow-hidden rounded-[2rem] border border-white bg-white p-3 shadow-2xl">
-                        <img src={siteContent?.heroImage || heroImage} alt="Joel working on software projects" className="aspect-[4/5] w-full rounded-[1.35rem] object-cover" />
+                        <img
+                            src={siteContent?.heroImage || heroImage}
+                            alt="Joel working on software projects"
+                            className="aspect-[4/5] w-full rounded-[1.35rem] object-cover"
+                            width="900"
+                            height="1125"
+                            loading="eager"
+                            fetchPriority="high"
+                            decoding="async"
+                        />
                         <div className="absolute bottom-7 left-7 right-7 grid grid-cols-3 gap-2 rounded-2xl border border-white/40 bg-slate-950/82 p-3 text-white backdrop-blur-md">
                             {['Linux', 'DevOps', 'Cloud'].map((item) => (
                                 <span key={item} className="rounded-xl bg-white/10 px-3 py-2 text-center text-xs font-extrabold">{item}</span>

@@ -22,7 +22,13 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/joel_portfo
 
 // Routes
 const path = require('path');
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+    maxAge: '1y',
+    immutable: true,
+    setHeaders: (res) => {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+}));
 app.use('/api/auth', require('./routes/auth'));
 
 app.use('/api/public', require('./routes/public'));

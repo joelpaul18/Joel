@@ -40,7 +40,16 @@ export default function Projects() {
                             className={`surface group overflow-hidden rounded-2xl ${project.isFeatured ? 'md:col-span-2 lg:col-span-2' : ''}`}
                         >
                             <div className="relative aspect-video overflow-hidden bg-slate-100">
-                                <img src={project.thumbnail} alt={project.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                <img
+                                    src={project.thumbnail}
+                                    alt={project.name}
+                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    width="720"
+                                    height="405"
+                                    loading={i < 2 ? 'eager' : 'lazy'}
+                                    fetchPriority={i < 2 ? 'high' : 'auto'}
+                                    decoding="async"
+                                />
                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 to-transparent opacity-80" />
                                 <div className="absolute left-5 right-5 bottom-5 flex items-center justify-between gap-4">
                                     {project.isFeatured && (

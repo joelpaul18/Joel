@@ -31,7 +31,15 @@ export default function About() {
                         className="relative hidden lg:block"
                     >
                         <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-3 shadow-xl">
-                            <img src={siteContent?.aboutImage || heroImage} alt="Portrait style workspace visual" className="aspect-square w-full rounded-[1.35rem] object-cover" />
+                            <img
+                                src={siteContent?.aboutImage || heroImage}
+                                alt="Portrait style workspace visual"
+                                className="aspect-square w-full rounded-[1.35rem] object-cover"
+                                width="720"
+                                height="720"
+                                loading="lazy"
+                                decoding="async"
+                            />
                         </div>
                         <div className="absolute -bottom-6 -right-4 rounded-2xl bg-slate-950 px-5 py-4 text-white shadow-xl">
                             <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-amber-200">Focus</p>
