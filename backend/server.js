@@ -34,5 +34,32 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/public', require('./routes/public'));
 app.use('/api/admin', require('./routes/admin'));
 
+// Ping endpoint for keep-awake services (like UptimeRobot)
+app.get('/ping', (req, res) => {
+    res.status(200).send('pong');
+});
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    
+    // Optional Self-Ping to prevent sleep (e.g. on Render Free tier)
+    const selfPingUrl = process.env.BACKEND_URL || process.env.SELF_PING_URL;
+    if (selfPingUrl) {
+        const https = require('https');
+        const http = require('http');
+        const PING_INTERVAL = 14 * 60 * 1000; // 14 minutes
+        
+        setInterval(() => {
+            const client = selfPingUrl.startsWith('https') ? https : http;
+            const targetUrl = selfPingUrl.endsWith('/') ? `${selfPingUrl}ping` : `${selfPingUrl}/ping`;
+            
+            client.get(targetUrl, (res) => {
+                console.log(`[Keep-Awake] Self-ping status: ${res.statusCode}`);
+            }).on('error', (err) => {
+                console.error('[Keep-Awake] Self-ping failed:', err.message);
+            });
+        }, PING_INTERVAL);
+        console.log(`[Keep-Awake] Self-ping initiated for: ${selfPingUrl}`);
+    }
+});

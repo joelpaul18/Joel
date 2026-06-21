@@ -3,6 +3,7 @@ import { useEffect, useState, useContext } from 'react';
 import { Code2, ExternalLink, Star } from 'lucide-react';
 import axios from 'axios';
 import { SiteContext } from '../context/SiteContext';
+import { getImageUrl } from '../lib/api';
 
 
 
@@ -41,7 +42,7 @@ export default function Projects() {
                         >
                             <div className="relative aspect-video overflow-hidden bg-slate-100">
                                 <img
-                                    src={project.thumbnail}
+                                    src={getImageUrl(project.thumbnail)}
                                     alt={project.name}
                                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                     width="720"
