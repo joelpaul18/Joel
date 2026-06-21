@@ -3,7 +3,6 @@ import { useContext } from 'react';
 import { SiteContext } from '../context/SiteContext';
 import { Compass, Target } from 'lucide-react';
 import heroImage from '../assets/hero.png';
-import { getImageUrl } from '../lib/api';
 
 export default function About() {
     const { siteContent } = useContext(SiteContext);
@@ -33,7 +32,7 @@ export default function About() {
                     >
                         <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-3 shadow-xl">
                             <img
-                                src={getImageUrl(siteContent?.aboutImage) || heroImage}
+                                src={siteContent?.aboutImage || heroImage}
                                 alt="Portrait style workspace visual"
                                 className="aspect-square w-full rounded-[1.35rem] object-cover"
                                 width="720"

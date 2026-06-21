@@ -3,7 +3,6 @@ import { useState, useEffect, useContext } from 'react';
 import { SiteContext } from '../context/SiteContext';
 import { ArrowDown, ArrowUpRight, Sparkles } from 'lucide-react';
 import heroImage from '../assets/hero.png';
-import { getImageUrl } from '../lib/api';
 
 export default function Hero() {
     const { siteContent } = useContext(SiteContext);
@@ -60,7 +59,7 @@ export default function Hero() {
                     <div className="absolute -inset-5 rotate-3 rounded-[2rem] bg-amber-300/30" />
                     <div className="relative overflow-hidden rounded-[2rem] border border-white bg-white p-3 shadow-2xl">
                         <img
-                            src={getImageUrl(siteContent?.heroImage) || heroImage}
+                            src={siteContent?.heroImage || heroImage}
                             alt="Joel working on software projects"
                             className="aspect-[4/5] w-full rounded-[1.35rem] object-cover"
                             width="900"

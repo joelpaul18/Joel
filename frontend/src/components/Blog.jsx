@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Clock } from 'lucide-react';
 import axios from 'axios';
-import { getImageUrl } from '../lib/api';
 
 
 export default function Blog() {
@@ -36,7 +35,7 @@ export default function Blog() {
                             <Link to={`/blog/${blog.slug}`} className="group block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.08] transition-all hover:-translate-y-1 hover:bg-white/[0.12]">
                                 <div className="aspect-video overflow-hidden bg-white/10">
                                     <img
-                                        src={getImageUrl(blog.coverImage)}
+                                        src={blog.coverImage}
                                         alt={blog.title}
                                         className="h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-105"
                                         width="720"

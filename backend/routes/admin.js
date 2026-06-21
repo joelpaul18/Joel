@@ -27,44 +27,15 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-const cloudinary = require('cloudinary').v2;
-
-if (process.env.CLOUDINARY_CLOUD_NAME) {
-    cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET
-    });
-}
-
-
 router.use(verifyToken);
 
 // File Upload
-router.post('/upload', upload.single('image'), async (req, res) => {
+router.post('/upload', upload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
     }
-    try {
-        if (process.env.CLOUDINARY_CLOUD_NAME) {
-            const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: 'joel_portfolio_uploads'
-            });
-            if (fs.existsSync(req.file.path)) {
-                fs.unlinkSync(req.file.path);
-            }
-            return res.json({ imageUrl: result.secure_url });
-        } else {
-            const imageUrl = `/uploads/${req.file.filename}`;
-            return res.json({ imageUrl });
-        }
-    } catch (error) {
-        console.error('Upload error:', error);
-        if (req.file && fs.existsSync(req.file.path)) {
-            fs.unlinkSync(req.file.path);
-        }
-        return res.status(500).json({ message: 'Upload failed' });
-    }
+    const imageUrl = `/uploads/${req.file.filename}`;
+    res.json({ imageUrl });
 });
 
 // Stats

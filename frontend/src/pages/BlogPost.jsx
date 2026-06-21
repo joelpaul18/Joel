@@ -3,7 +3,6 @@ import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
-import { getImageUrl } from '../lib/api';
 import Footer from '../components/Footer';
 
 export default function BlogPost() {
@@ -77,7 +76,7 @@ export default function BlogPost() {
                             {post.coverImage && (
                                 <div className="mt-12 overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-3 shadow-xl">
                                     <img
-                                        src={getImageUrl(post.coverImage)}
+                                        src={post.coverImage}
                                         alt={post.title}
                                         className="aspect-video w-full rounded-[1.35rem] object-cover"
                                         width="900"
